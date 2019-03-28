@@ -33,23 +33,17 @@ public class JMXClient {
         return JMXClient.client;
     }
 
-    public long getParameter(String name) throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
-        if (name.equals("maxThreads") || name.equals("minSpareThreads")){
-            ObjectName mbean = new ObjectName("Catalina:type=Executor,name=tomcatThreadPool");
-            return ((Integer) mbsc.getAttribute(mbean, name));
-        }
-
-        return -1;
+    public long getParameter(String name, String objectName) throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
+        ObjectName mbean = new ObjectName(objectName);
+        return ((Integer) mbsc.getAttribute(mbean, name));
     }
 
-    public boolean setParameter(String name, long value) throws MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {
-        if (name.equals("maxThreads") || name.equals("minSpareThreads")){
-            ObjectName mbean = new ObjectName("Catalina:type=Executor,name=tomcatThreadPool");
-            mbsc.setAttribute(mbean, new Attribute(name, value));
-        }
+    public boolean setParameter(String name, long value, String objectName) throws MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {
+        ObjectName mbean = new ObjectName(objectName);
+        mbsc.setAttribute(mbean, new Attribute(name, value));
 
         // check whether it was successful
-        return getParameter(name)==value;
+        return getParameter(name, objectName)==value;
     }
 
 

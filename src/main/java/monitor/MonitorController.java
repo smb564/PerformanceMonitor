@@ -11,11 +11,33 @@ import java.io.IOException;
 @RestController
 public class MonitorController {
 
+    private final String THREAD_POOL_OBJECT = "Catalina:type=Executor,name=tomcatThreadPool";
+    private final String PERFORMANCE_OBJECT = "Catalina:type=GlobalRequestProcessor,name=\"ajp-bio-8009\"";
+
     @RequestMapping(value = "/performance", method=RequestMethod.GET)
-    public Metrics performance(){
+    public long[] performance(){
         System.out.println("Querying the current system performance");
         // Read the values using the JMX Client
-        return new Metrics(null, null);
+        try {
+            long processingTime = (long) JMXClient.getInstance().getParameter("processingTime", PERFORMANCE_OBJECT);
+            long requestCount = (long) JMXClient.getInstance().getParameter("requestCount", PERFORMANCE_OBJECT);
+            return new long[]{processingTime, requestCount};
+
+        } catch (MalformedObjectNameException e) {
+            e.printStackTrace();
+        } catch (AttributeNotFoundException e) {
+            e.printStackTrace();
+        } catch (MBeanException e) {
+            e.printStackTrace();
+        } catch (ReflectionException e) {
+            e.printStackTrace();
+        } catch (InstanceNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new long[]{-1, -1};
     }
 
     @RequestMapping(value = "/setparam", method = RequestMethod.PUT)
@@ -25,7 +47,7 @@ public class MonitorController {
         // find the relevant attribute and set the value
         // check whether the update succeed
         try {
-            return JMXClient.getInstance().setParameter(name, value);
+            return JMXClient.getInstance().setParameter(name, value, THREAD_POOL_OBJECT);
         } catch (MalformedObjectNameException e) {
             e.printStackTrace();
         } catch (AttributeNotFoundException e) {
@@ -50,7 +72,7 @@ public class MonitorController {
         System.out.println(String.format("Querying the values of parameter \"%s\"", name));
         // Query the JMX and get the param
         try {
-            return JMXClient.getInstance().getParameter(name);
+            return JMXClient.getInstance().getParameter(name, THREAD_POOL_OBJECT);
         } catch (MalformedObjectNameException e) {
             e.printStackTrace();
         } catch (AttributeNotFoundException e) {
