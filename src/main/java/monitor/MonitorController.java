@@ -19,8 +19,8 @@ public class MonitorController {
         System.out.println("Querying the current system performance");
         // Read the values using the JMX Client
         try {
-            long processingTime = (long) JMXClient.getInstance().getParameter("processingTime", PERFORMANCE_OBJECT);
-            long requestCount = (long) JMXClient.getInstance().getParameter("requestCount", PERFORMANCE_OBJECT);
+            long processingTime = JMXClient.getInstance().getParameter("processingTime", PERFORMANCE_OBJECT);
+            long requestCount = JMXClient.getInstance().getParameter("requestCount", PERFORMANCE_OBJECT);
             return new long[]{processingTime, requestCount};
 
         } catch (MalformedObjectNameException e) {

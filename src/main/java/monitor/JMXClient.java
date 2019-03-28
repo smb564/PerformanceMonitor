@@ -35,7 +35,13 @@ public class JMXClient {
 
     public long getParameter(String name, String objectName) throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
         ObjectName mbean = new ObjectName(objectName);
-        return ((Integer) mbsc.getAttribute(mbean, name));
+        Object res = mbsc.getAttribute(mbean, name);
+
+        if (res instanceof Long)
+            return (long) res;
+        else{
+            return ((Integer) res).longValue();
+        }
     }
 
     public boolean setParameter(String name, long value, String objectName) throws MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {
