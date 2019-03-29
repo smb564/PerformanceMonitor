@@ -41,7 +41,7 @@ public class MonitorController {
     }
 
     @RequestMapping(value = "/setparam", method = RequestMethod.PUT)
-    public boolean setParam(@RequestParam(value = "name") String name, @RequestParam(value = "value") long value){
+    public boolean setParam(@RequestParam(value = "name") String name, @RequestParam(value = "value") int value){
         System.out.println(String.format("Setting the value of parameter \"%s\" to %d", name, value));
 
         // find the relevant attribute and set the value
@@ -67,7 +67,7 @@ public class MonitorController {
         return false;
     }
 
-    @RequestMapping(value = "getparam", method = RequestMethod.GET)
+    @RequestMapping(value = "/getparam", method = RequestMethod.GET)
     public long getParam(@RequestParam(value = "name") String name){
         System.out.println(String.format("Querying the values of parameter \"%s\"", name));
         // Query the JMX and get the param
