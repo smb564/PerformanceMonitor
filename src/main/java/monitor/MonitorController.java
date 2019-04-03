@@ -12,55 +12,40 @@ import java.io.IOException;
 public class MonitorController {
 
     private final String THREAD_POOL_OBJECT = "Catalina:type=Executor,name=tomcatThreadPool";
-    private final String PERFORMANCE_OBJECT = "Catalina:type=GlobalRequestProcessor,name=\"ajp-bio-8009\"";
+    private final String PERFORMANCE_OBJECT = "metrics:name=response_times";
+    private final String IAR_OBJECT = "metrics:name=InterArrivalRate";
 
     @RequestMapping(value = "/performance", method=RequestMethod.GET)
-    public long[] performance(){
+    public Number[] performance(){
         System.out.println("Querying the current system performance");
         // Read the values using the JMX Client
         try {
-            long processingTime = JMXClient.getInstance().getParameter("processingTime", PERFORMANCE_OBJECT);
-            long requestCount = JMXClient.getInstance().getParameter("requestCount", PERFORMANCE_OBJECT);
-            return new long[]{processingTime, requestCount};
+            Number iar = JMXClient.getInstance().getParameter("Value", IAR_OBJECT);
+            // TODO: this is not the request count for the window. It is the total request count
+            Number request_count = JMXClient.getInstance().getParameter("Count", PERFORMANCE_OBJECT);
+            Number mean_latency = JMXClient.getInstance().getParameter("Mean", PERFORMANCE_OBJECT);
+            Number latency_99 = JMXClient.getInstance().getParameter("99thPercentile", PERFORMANCE_OBJECT);
 
-        } catch (MalformedObjectNameException e) {
-            e.printStackTrace();
-        } catch (AttributeNotFoundException e) {
-            e.printStackTrace();
-        } catch (MBeanException e) {
-            e.printStackTrace();
-        } catch (ReflectionException e) {
-            e.printStackTrace();
-        } catch (InstanceNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            return new Number[]{iar, request_count, mean_latency, latency_99};
+
+
+        } catch (MalformedObjectNameException | AttributeNotFoundException | MBeanException | ReflectionException | InstanceNotFoundException | IOException e) {
+            // It is not the best to capture exceptions like this. Okay for POC level.
             e.printStackTrace();
         }
 
-        return new long[]{-1, -1};
+        return new Number[]{-1, -1};
     }
 
     @RequestMapping(value = "/setparam", method = RequestMethod.PUT)
-    public boolean setParam(@RequestParam(value = "name") String name, @RequestParam(value = "value") int value){
-        System.out.println(String.format("Setting the value of parameter \"%s\" to %d", name, value));
+    public boolean setParam(@RequestParam(value = "name") String name, @RequestParam(value = "value") Number value){
+        System.out.println("Setting the value of parameter "+ name + " to " + value);
 
         // find the relevant attribute and set the value
         // check whether the update succeed
         try {
             return JMXClient.getInstance().setParameter(name, value, THREAD_POOL_OBJECT);
-        } catch (MalformedObjectNameException e) {
-            e.printStackTrace();
-        } catch (AttributeNotFoundException e) {
-            e.printStackTrace();
-        } catch (InvalidAttributeValueException e) {
-            e.printStackTrace();
-        } catch (ReflectionException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InstanceNotFoundException e) {
-            e.printStackTrace();
-        } catch (MBeanException e) {
+        } catch (MalformedObjectNameException | AttributeNotFoundException | InvalidAttributeValueException | ReflectionException | IOException | InstanceNotFoundException | MBeanException e) {
             e.printStackTrace();
         }
 
@@ -68,22 +53,12 @@ public class MonitorController {
     }
 
     @RequestMapping(value = "/getparam", method = RequestMethod.GET)
-    public long getParam(@RequestParam(value = "name") String name){
+    public Number getParam(@RequestParam(value = "name") String name){
         System.out.println(String.format("Querying the values of parameter \"%s\"", name));
         // Query the JMX and get the param
         try {
             return JMXClient.getInstance().getParameter(name, THREAD_POOL_OBJECT);
-        } catch (MalformedObjectNameException e) {
-            e.printStackTrace();
-        } catch (AttributeNotFoundException e) {
-            e.printStackTrace();
-        } catch (MBeanException e) {
-            e.printStackTrace();
-        } catch (ReflectionException e) {
-            e.printStackTrace();
-        } catch (InstanceNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (MalformedObjectNameException | AttributeNotFoundException | MBeanException | ReflectionException | InstanceNotFoundException | IOException e) {
             e.printStackTrace();
         }
         return -1;

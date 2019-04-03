@@ -33,24 +33,19 @@ public class JMXClient {
         return JMXClient.client;
     }
 
-    public long getParameter(String name, String objectName) throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
+    public Number getParameter(String name, String objectName) throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
         ObjectName mbean = new ObjectName(objectName);
         Object res = mbsc.getAttribute(mbean, name);
-
-        if (res instanceof Long)
-            return (long) res;
-        else{
-            return ((Integer) res).longValue();
-        }
+        return (Number) res;
     }
 
-    public boolean setParameter(String name, int value, String objectName) throws MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {
+
+    public boolean setParameter(String name, Number value, String objectName) throws MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {
         ObjectName mbean = new ObjectName(objectName);
-        mbsc.setAttribute(mbean, new Attribute(name, value));
+        mbsc.setAttribute(mbean, new Attribute(name, value.intValue()));
 
         // check whether it was successful
-        return getParameter(name, objectName)==value;
+        return getParameter(name, objectName).toString().equals(value.toString());
     }
-
 
 }
