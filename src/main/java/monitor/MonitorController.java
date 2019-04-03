@@ -14,6 +14,8 @@ public class MonitorController {
     private final String THREAD_POOL_OBJECT = "Catalina:type=Executor,name=tomcatThreadPool";
     private final String PERFORMANCE_OBJECT = "metrics:name=response_times";
     private final String IAR_OBJECT = "metrics:name=InterArrivalRate";
+    private final String AJP_CONNECTOR_OBJECT = "Catalina:type=Connector,port=8009";
+    private final String HTTP_CONNECTOR_OBJECT = "Catalina:type=Connector,port=8080";
 
     @RequestMapping(value = "/performance", method=RequestMethod.GET)
     public Number[] performance(){
@@ -44,7 +46,7 @@ public class MonitorController {
         // find the relevant attribute and set the value
         // check whether the update succeed
         try {
-            return JMXClient.getInstance().setParameter(name, value, THREAD_POOL_OBJECT);
+            return JMXClient.getInstance().setParameter(name, value, AJP_CONNECTOR_OBJECT);
         } catch (MalformedObjectNameException | AttributeNotFoundException | InvalidAttributeValueException | ReflectionException | IOException | InstanceNotFoundException | MBeanException e) {
             e.printStackTrace();
         }
@@ -57,7 +59,7 @@ public class MonitorController {
         System.out.println(String.format("Querying the values of parameter \"%s\"", name));
         // Query the JMX and get the param
         try {
-            return JMXClient.getInstance().getParameter(name, THREAD_POOL_OBJECT);
+            return JMXClient.getInstance().getParameter(name, AJP_CONNECTOR_OBJECT);
         } catch (MalformedObjectNameException | AttributeNotFoundException | MBeanException | ReflectionException | InstanceNotFoundException | IOException e) {
             e.printStackTrace();
         }
