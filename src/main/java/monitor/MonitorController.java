@@ -16,6 +16,7 @@ public class MonitorController {
     private final String IAR_OBJECT = "metrics:name=InterArrivalRate";
     private final String AJP_CONNECTOR_OBJECT = "Catalina:type=Connector,port=8009";
     private final String HTTP_CONNECTOR_OBJECT = "Catalina:type=Connector,port=8080";
+    private final String AJP_THREAD_POOL_OBJECT = "Catalina:type=ThreadPool,name=\"ajp-bio-8009\"";
 
     @RequestMapping(value = "/performance", method=RequestMethod.GET)
     public Number[] performance(){
@@ -59,6 +60,8 @@ public class MonitorController {
         System.out.println(String.format("Querying the values of parameter \"%s\"", name));
         // Query the JMX and get the param
         try {
+            if (name.equals("currentThreadCount"))
+                return JMXClient.getInstance().getParameter(name, AJP_THREAD_POOL_OBJECT);
             return JMXClient.getInstance().getParameter(name, AJP_CONNECTOR_OBJECT);
         } catch (MalformedObjectNameException | AttributeNotFoundException | MBeanException | ReflectionException | InstanceNotFoundException | IOException e) {
             e.printStackTrace();
