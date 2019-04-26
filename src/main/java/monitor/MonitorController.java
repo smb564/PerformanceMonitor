@@ -68,4 +68,9 @@ public class MonitorController {
         return -1;
     }
 
+    @RequestMapping(value="/reconnect", method = RequestMethod.GET)
+    public boolean reconnect(){
+        return JMXClient.getInstance().reconnect();
+    }
+
 }

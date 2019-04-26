@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 
 public class JMXClient {
     private static JMXClient client;
+    private final static String SERVICE_URL = "service:jmx:rmi:///jndi/rmi://192.168.32.11:9000/jmxrmi";
     private MBeanServerConnection mbsc;
 
     private JMXClient(String serviceUrl){
@@ -27,7 +28,7 @@ public class JMXClient {
 
     public static JMXClient getInstance(){
         if (JMXClient.client == null){
-            JMXClient.client = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.11:9000/jmxrmi");
+            JMXClient.client = new JMXClient(SERVICE_URL);
         }
 
         return JMXClient.client;
@@ -46,6 +47,21 @@ public class JMXClient {
 
         // check whether it was successful
         return getParameter(name, objectName).toString().equals(value.toString());
+    }
+
+    public boolean reconnect(){
+        try {
+            JMXServiceURL url = new JMXServiceURL(SERVICE_URL);
+            JMXConnector jmxc = JMXConnectorFactory.connect(url);
+            this.mbsc = jmxc.getMBeanServerConnection();
+            return true;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
 }
