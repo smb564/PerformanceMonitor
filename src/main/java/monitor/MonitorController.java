@@ -70,6 +70,7 @@ public class MonitorController {
 
     @RequestMapping(value="/reconnect", method = RequestMethod.GET)
     public boolean reconnect(){
+        System.out.println("Reconnecting to the Tomcat Server...");
         return JMXClient.getInstance().reconnect();
     }
 
