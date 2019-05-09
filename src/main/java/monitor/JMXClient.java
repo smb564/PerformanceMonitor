@@ -9,11 +9,13 @@ import java.net.MalformedURLException;
 
 public class JMXClient {
     private static JMXClient client;
-    private final static String SERVICE_URL = "service:jmx:rmi:///jndi/rmi://192.168.32.11:9000/jmxrmi";
+//    private String serviceUrl = "service:jmx:rmi:///jndi/rmi://192.168.32.11:9000/jmxrmi";
+    private String serviceUrl;
     private MBeanServerConnection mbsc;
 
-    private JMXClient(String serviceUrl){
+    public JMXClient(String serviceUrl){
         try {
+            this.serviceUrl = serviceUrl;
             JMXServiceURL url = new JMXServiceURL(serviceUrl);
             JMXConnector jmxc = JMXConnectorFactory.connect(url);
             this.mbsc = jmxc.getMBeanServerConnection();
@@ -26,13 +28,6 @@ public class JMXClient {
 
     }
 
-    public static JMXClient getInstance(){
-        if (JMXClient.client == null){
-            JMXClient.client = new JMXClient(SERVICE_URL);
-        }
-
-        return JMXClient.client;
-    }
 
     public Number getParameter(String name, String objectName) throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
         ObjectName mbean = new ObjectName(objectName);
@@ -51,7 +46,7 @@ public class JMXClient {
 
     public boolean reconnect(){
         try {
-            JMXServiceURL url = new JMXServiceURL(SERVICE_URL);
+            JMXServiceURL url = new JMXServiceURL(this.serviceUrl);
             JMXConnector jmxc = JMXConnectorFactory.connect(url);
             this.mbsc = jmxc.getMBeanServerConnection();
             return true;
