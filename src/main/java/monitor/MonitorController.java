@@ -22,6 +22,8 @@ public class MonitorController {
 
     private JMXClient tomcatClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.11:9000/jmxrmi");
     private JMXClient apacheClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.10:9010/jmxrmi");
+    private JMXClient rbeClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.6:9010/jmxrmi");
+
 
     @RequestMapping(value = "/performance", method=RequestMethod.GET)
     public Number[] performance(@RequestParam String server){
@@ -31,8 +33,10 @@ public class MonitorController {
 
         if (server.equalsIgnoreCase("tomcat"))
             client = tomcatClient;
-        else
+        else if (server.equalsIgnoreCase("apache"))
             client = apacheClient;
+        else
+            client = rbeClient;
 
         try {
             Number iar = -1;
