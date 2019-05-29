@@ -89,8 +89,7 @@ public class MonitorController {
     @RequestMapping(value="/reconnect", method = RequestMethod.GET)
     public boolean reconnect(){
         System.out.println("Reconnecting to the Tomcat Server...");
-        return !(tomcatClient.reconnect() && apacheClient.reconnect() && rbeClient.reconnect());
-
+        return tomcatClient.reconnect() & apacheClient.reconnect() & rbeClient.reconnect();
     }
 
 }
