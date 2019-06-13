@@ -1,5 +1,6 @@
 package monitor;
 
+import org.hibernate.validator.constraints.pl.REGON;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,11 +19,14 @@ public class MonitorController {
     private final String HTTP_CONNECTOR_OBJECT = "Catalina:type=Connector,port=8080";
     private final String AJP_THREAD_POOL_OBJECT = "Catalina:type=ThreadPool,name=\"ajp-bio-8009\"";
     private final String EXECUTOR_THREAD_POOL_OBJECT = "Catalina:type=Executor,name=tomcatThreadPool";
+    private final String RBE_OBJECT = "rbe:type=RBE";
+
 
 
     private JMXClient tomcatClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.11:9000/jmxrmi");
     private JMXClient apacheClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.10:9010/jmxrmi");
-    private JMXClient rbeClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.6:9010/jmxrmi");
+//    private JMXClient rbeClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.6:9010/jmxrmi");
+    private JMXClient rbeClient = new JMXClient("service:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
 
 
     @RequestMapping(value = "/performance", method=RequestMethod.GET)
@@ -90,6 +94,24 @@ public class MonitorController {
     public boolean reconnect(){
         System.out.println("Reconnecting to the Tomcat Server...");
         return tomcatClient.reconnect() & apacheClient.reconnect() & rbeClient.reconnect();
+    }
+
+    @RequestMapping(value = "/changeEBCount", method = RequestMethod.GET)
+    public boolean changeEBCount(@RequestParam(value = "count") int count) throws MalformedObjectNameException, ReflectionException, MBeanException, InstanceNotFoundException, IOException {
+        rbeClient.invokeMethod("changeEBCount", new Object[]{count}, new String[]{int.class.getName()}, RBE_OBJECT);
+        return true;
+    }
+
+    @RequestMapping(value = "/changeMix", method = RequestMethod.GET)
+    public boolean changeMix(@RequestParam(value = "mix") int mix, @RequestParam(value = "count") int count) throws MalformedObjectNameException, ReflectionException, MBeanException, InstanceNotFoundException, IOException {
+        rbeClient.invokeMethod("changeMix", new Object[]{mix, count}, new String[]{int.class.getName(), int.class.getName()}, RBE_OBJECT);
+        return true;
+    }
+
+    @RequestMapping(value = "/changeThinkTime", method = RequestMethod.GET)
+    public boolean setThinkTime(@RequestParam(value = "scale") double tt_scale) throws MalformedObjectNameException, ReflectionException, MBeanException, InstanceNotFoundException, IOException {
+        rbeClient.invokeMethod("changeThinkTime", new Object[]{tt_scale}, new String[]{double.class.getName()}, RBE_OBJECT);
+        return true;
     }
 
 }

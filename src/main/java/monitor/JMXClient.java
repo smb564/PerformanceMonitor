@@ -59,4 +59,10 @@ public class JMXClient {
         return false;
     }
 
+    public boolean invokeMethod(String methodName, Object[] params, String[] signature, String objectName) throws MalformedObjectNameException, ReflectionException, MBeanException, InstanceNotFoundException, IOException {
+        ObjectName mbean = new ObjectName(objectName);
+        mbsc.invoke(mbean, methodName, params, signature);
+        return true;
+    }
+
 }
