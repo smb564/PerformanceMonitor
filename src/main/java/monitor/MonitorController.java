@@ -70,7 +70,11 @@ public class MonitorController {
         // find the relevant attribute and set the value
         // check whether the update succeed
         try {
-            return tomcatClient.setParameter(name, value, EXECUTOR_THREAD_POOL_OBJECT);
+            if (name.equalsIgnoreCase("keepAliveTimeout"))
+                return tomcatClient.setParameter(name, value, HTTP_CONNECTOR_OBJECT);
+            else
+                return tomcatClient.setParameter(name, value, EXECUTOR_THREAD_POOL_OBJECT);
+
         } catch (MalformedObjectNameException | AttributeNotFoundException | InvalidAttributeValueException | ReflectionException | IOException | InstanceNotFoundException | MBeanException e) {
             e.printStackTrace();
         }
