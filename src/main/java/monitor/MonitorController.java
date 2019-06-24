@@ -14,6 +14,7 @@ public class MonitorController {
 
     private final String THREAD_POOL_OBJECT = "Catalina:type=Executor,name=tomcatThreadPool";
     private final String PERFORMANCE_OBJECT = "metrics:name=response_times";
+    private final String PERFORMANCE_ALL_OBJECT = "metrics:name=response_times_all";
     private final String IAR_OBJECT = "metrics:name=InterArrivalRate";
     private final String AJP_CONNECTOR_OBJECT = "Catalina:type=Connector,port=8009";
     private final String HTTP_CONNECTOR_OBJECT = "Catalina:type=Connector,port=8080";
@@ -51,6 +52,29 @@ public class MonitorController {
             Number request_count = client.getParameter("Count", PERFORMANCE_OBJECT);
             Number mean_latency = client.getParameter("Mean", PERFORMANCE_OBJECT);
             Number latency_99 = client.getParameter("99thPercentile", PERFORMANCE_OBJECT);
+
+            return new Number[]{iar, request_count, mean_latency, latency_99};
+
+
+        } catch (MalformedObjectNameException | AttributeNotFoundException | MBeanException | ReflectionException | InstanceNotFoundException | IOException e) {
+            // It is not the best to capture exceptions like this. Okay for POC level.
+            e.printStackTrace();
+        }
+
+        return new Number[]{-1, -1};
+    }
+
+    @RequestMapping(value = "/performance-mi", method = RequestMethod.GET)
+    public Number[] getPerformanceMI(){
+        // return the performance metrics collected only for the measurement interval
+        System.out.println("Querying the current system performance mi");
+        // Read the values using the JMX Client
+
+        try {
+            Number iar = -1;
+            Number request_count = rbeClient.getParameter("Count", PERFORMANCE_ALL_OBJECT);
+            Number mean_latency = rbeClient.getParameter("Mean", PERFORMANCE_ALL_OBJECT);
+            Number latency_99 = rbeClient.getParameter("99thPercentile", PERFORMANCE_ALL_OBJECT);
 
             return new Number[]{iar, request_count, mean_latency, latency_99};
 
