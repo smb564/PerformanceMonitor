@@ -14,6 +14,7 @@ public class MonitorController {
 
     private final String THREAD_POOL_OBJECT = "Catalina:type=Executor,name=tomcatThreadPool";
     private final String PERFORMANCE_OBJECT = "metrics:name=response_times";
+    // This is a timer (DropWizard Timer) which collects metrics for the measuring interval period
     private final String PERFORMANCE_ALL_OBJECT = "metrics:name=response_times_all";
     private final String IAR_OBJECT = "metrics:name=InterArrivalRate";
     private final String AJP_CONNECTOR_OBJECT = "Catalina:type=Connector,port=8009";
@@ -21,6 +22,7 @@ public class MonitorController {
     private final String AJP_THREAD_POOL_OBJECT = "Catalina:type=ThreadPool,name=\"ajp-bio-8009\"";
     private final String EXECUTOR_THREAD_POOL_OBJECT = "Catalina:type=Executor,name=tomcatThreadPool";
     private final String RBE_OBJECT = "rbe:type=RBE";
+    private final String ERROR_OBJECT = "metrics:name=errors";
 
 
 
@@ -52,8 +54,9 @@ public class MonitorController {
             Number request_count = client.getParameter("Count", PERFORMANCE_OBJECT);
             Number mean_latency = client.getParameter("Mean", PERFORMANCE_OBJECT);
             Number latency_99 = client.getParameter("99thPercentile", PERFORMANCE_OBJECT);
-
-            return new Number[]{iar, request_count, mean_latency, latency_99};
+            Number stddev = rbeClient.getParameter("StdDev", PERFORMANCE_OBJECT);
+            Number errors = rbeClient.getParameter("Count", ERROR_OBJECT);
+            return new Number[]{iar, request_count, mean_latency, latency_99, stddev, errors};
 
 
         } catch (MalformedObjectNameException | AttributeNotFoundException | MBeanException | ReflectionException | InstanceNotFoundException | IOException e) {
@@ -75,8 +78,9 @@ public class MonitorController {
             Number request_count = rbeClient.getParameter("Count", PERFORMANCE_ALL_OBJECT);
             Number mean_latency = rbeClient.getParameter("Mean", PERFORMANCE_ALL_OBJECT);
             Number latency_99 = rbeClient.getParameter("99thPercentile", PERFORMANCE_ALL_OBJECT);
-
-            return new Number[]{iar, request_count, mean_latency, latency_99};
+            Number stddev = rbeClient.getParameter("StdDev", PERFORMANCE_ALL_OBJECT);
+            Number errors = rbeClient.getParameter("Count", ERROR_OBJECT);
+            return new Number[]{iar, request_count, mean_latency, latency_99, stddev, errors};
 
 
         } catch (MalformedObjectNameException | AttributeNotFoundException | MBeanException | ReflectionException | InstanceNotFoundException | IOException e) {
