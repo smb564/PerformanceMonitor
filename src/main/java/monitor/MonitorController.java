@@ -15,7 +15,6 @@ public class MonitorController {
     private final String THREAD_POOL_OBJECT = "Catalina:type=Executor,name=tomcatThreadPool";
     private final String PERFORMANCE_OBJECT = "metrics:name=response_times";
     // This is a timer (DropWizard Timer) which collects metrics for the measuring interval period
-    private final String PERFORMANCE_ALL_OBJECT = "metrics:name=response_times_all";
     private final String IAR_OBJECT = "metrics:name=InterArrivalRate";
     private final String AJP_CONNECTOR_OBJECT = "Catalina:type=Connector,port=8009";
     private final String HTTP_CONNECTOR_OBJECT = "Catalina:type=Connector,port=8080";
@@ -23,6 +22,11 @@ public class MonitorController {
     private final String EXECUTOR_THREAD_POOL_OBJECT = "Catalina:type=Executor,name=tomcatThreadPool";
     private final String RBE_OBJECT = "rbe:type=RBE";
     private final String ERROR_OBJECT = "metrics:name=errors";
+
+    private final String GAUGE_MEAN_LATENCY = "metrics:name=mean_response_time";
+    private final String GAUGE_P99_LATENCY = "metrics:name=p99_latency";
+    private final String GAUGE_STD_DEV_LATENCY = "metrics:name=std_deviation";
+    private final String GAUGE_REQUEST_COUNT = "metrics:name=total_requests";
 
 
 
@@ -75,10 +79,10 @@ public class MonitorController {
 
         try {
             Number iar = -1;
-            Number request_count = rbeClient.getParameter("Count", PERFORMANCE_ALL_OBJECT);
-            Number mean_latency = rbeClient.getParameter("Mean", PERFORMANCE_ALL_OBJECT);
-            Number latency_99 = rbeClient.getParameter("99thPercentile", PERFORMANCE_ALL_OBJECT);
-            Number stddev = rbeClient.getParameter("StdDev", PERFORMANCE_ALL_OBJECT);
+            Number request_count = rbeClient.getParameter("Value", GAUGE_REQUEST_COUNT);
+            Number mean_latency = rbeClient.getParameter("Value", GAUGE_MEAN_LATENCY);
+            Number latency_99 = rbeClient.getParameter("Value", GAUGE_P99_LATENCY);
+            Number stddev = rbeClient.getParameter("Value", GAUGE_STD_DEV_LATENCY);
             Number errors = rbeClient.getParameter("Count", ERROR_OBJECT);
             return new Number[]{iar, request_count, mean_latency, latency_99, stddev, errors};
 
