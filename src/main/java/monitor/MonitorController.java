@@ -1,6 +1,5 @@
 package monitor;
 
-import org.hibernate.validator.constraints.pl.REGON;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,11 +27,16 @@ public class MonitorController {
     private final String GAUGE_STD_DEV_LATENCY = "metrics:name=std_deviation";
     private final String GAUGE_REQUEST_COUNT = "metrics:name=total_requests";
 
-
+    private final String NETTY_PERFORMANCE_OBJECT = "metrics:name=response_times";
+    private final String NETTY_THREAD_POOL = "thirdThreadPool:type=CustomThreadPool";
 
     private JMXClient tomcatClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.11:9000/jmxrmi");
     private JMXClient apacheClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.10:9010/jmxrmi");
     private JMXClient rbeClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.6:9010/jmxrmi");
+//    private JMXClient nettyClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.11:9010/jmxrmi");
+    private JMXClient nettyClient = new JMXClient("service:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
+
+
 //     private JMXClient rbeClient = new JMXClient("service:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
 
 
@@ -69,6 +73,42 @@ public class MonitorController {
         }
 
         return new Number[]{-1, -1};
+    }
+
+    @RequestMapping(value = "/performance-netty", method = RequestMethod.GET)
+    public Number[] getPerformanceNetty(){
+        Number iar = -1;
+        Number errors = -1;
+        try {
+            Number request_count = nettyClient.getParameter("Count", NETTY_PERFORMANCE_OBJECT);
+            Number mean_latency = nettyClient.getParameter("Mean", NETTY_PERFORMANCE_OBJECT);
+            Number latency_99 = nettyClient.getParameter("99thPercentile", NETTY_PERFORMANCE_OBJECT);
+            Number stddev = nettyClient.getParameter("StdDev", NETTY_PERFORMANCE_OBJECT);
+            return new Number[]{iar, request_count, mean_latency, latency_99, stddev, errors};
+        } catch (MalformedObjectNameException | AttributeNotFoundException | MBeanException | ReflectionException | InstanceNotFoundException | IOException e) {
+            e.printStackTrace();
+        }
+        return new Number[]{-1, -1};
+    }
+
+    @RequestMapping(value = "setThreadPoolNetty", method = RequestMethod.PUT)
+    public boolean setThreadPoolNetty(@RequestParam(value = "size") int size){
+        try {
+            return nettyClient.setParameter("poolSize", size, NETTY_THREAD_POOL);
+        } catch (MalformedObjectNameException | AttributeNotFoundException | InvalidAttributeValueException | ReflectionException | IOException | InstanceNotFoundException | MBeanException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @RequestMapping(value = "getThreadPoolNetty", method = RequestMethod.GET)
+    public Number getThreadPoolNetty(){
+        try {
+            return nettyClient.getParameter("poolSize", NETTY_THREAD_POOL);
+        } catch (MalformedObjectNameException | AttributeNotFoundException | MBeanException | ReflectionException | InstanceNotFoundException | IOException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
     @RequestMapping(value = "/performance-mi", method = RequestMethod.GET)
@@ -130,6 +170,12 @@ public class MonitorController {
     public boolean reconnect(){
         System.out.println("Reconnecting to the Tomcat Server...");
         return tomcatClient.reconnect() & apacheClient.reconnect() & rbeClient.reconnect();
+    }
+
+    @RequestMapping(value = "/reconnect-netty", method = RequestMethod.GET)
+    public boolean reconnectNetty(){
+        System.out.println("Reconnecting to Netty Server...");
+        return nettyClient.reconnect();
     }
 
     @RequestMapping(value = "/changeEBCount", method = RequestMethod.GET)
