@@ -94,7 +94,7 @@ public class MonitorController {
     @RequestMapping(value = "setThreadPoolNetty", method = RequestMethod.PUT)
     public boolean setThreadPoolNetty(@RequestParam(value = "size") int size){
         try {
-            return nettyClient.setParameter("poolSize", size, NETTY_THREAD_POOL);
+            return nettyClient.setParameter("PoolSize", size, NETTY_THREAD_POOL);
         } catch (MalformedObjectNameException | AttributeNotFoundException | InvalidAttributeValueException | ReflectionException | IOException | InstanceNotFoundException | MBeanException e) {
             e.printStackTrace();
         }
@@ -104,7 +104,7 @@ public class MonitorController {
     @RequestMapping(value = "getThreadPoolNetty", method = RequestMethod.GET)
     public Number getThreadPoolNetty(){
         try {
-            return nettyClient.getParameter("poolSize", NETTY_THREAD_POOL);
+            return nettyClient.getParameter("PoolSize", NETTY_THREAD_POOL);
         } catch (MalformedObjectNameException | AttributeNotFoundException | MBeanException | ReflectionException | InstanceNotFoundException | IOException e) {
             e.printStackTrace();
         }
