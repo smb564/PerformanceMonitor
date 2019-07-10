@@ -28,7 +28,7 @@ public class MonitorController {
     private final String GAUGE_REQUEST_COUNT = "metrics:name=total_requests";
 
     private final String NETTY_PERFORMANCE_OBJECT = "metrics:name=response_times";
-    private final String NETTY_THREAD_POOL = "thirdThreadPool:type=CustomThreadPool";
+    private final String NETTY_THREAD_POOL = "threadPool:type=StandardThreadExecutor";
 
     private JMXClient tomcatClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.11:9000/jmxrmi");
     private JMXClient apacheClient = new JMXClient("service:jmx:rmi:///jndi/rmi://192.168.32.10:9010/jmxrmi");
@@ -94,10 +94,12 @@ public class MonitorController {
     @RequestMapping(value = "setThreadPoolNetty", method = RequestMethod.PUT)
     public boolean setThreadPoolNetty(@RequestParam(value = "size") int size){
         try {
-            return nettyClient.setParameter("PoolSize", size, NETTY_THREAD_POOL);
-        } catch (MalformedObjectNameException | AttributeNotFoundException | InvalidAttributeValueException | ReflectionException | IOException | InstanceNotFoundException | MBeanException e) {
+            return nettyClient.invokeMethod("resizePool", new Object[]{size, size},
+                    new String[]{int.class.getName(), int.class.getName()}, NETTY_THREAD_POOL);
+        } catch (MalformedObjectNameException | ReflectionException | MBeanException | InstanceNotFoundException | IOException e) {
             e.printStackTrace();
         }
+
         return false;
     }
 
