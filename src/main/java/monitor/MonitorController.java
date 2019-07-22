@@ -40,6 +40,14 @@ public class MonitorController {
 //     private JMXClient rbeClient = new JMXClient("service:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi");
 
 
+    // This is an endpoint to query the perfomance of TPC-W setup's Client side (RBE side), Apachet server or Tomcat server
+    // e.g. To query the parameter of Tomcat you should send a GET req. to /performance?server=tomcat
+    // other options server=apache, server=client
+    // This will return an array containing different perfomance metrics
+    // If there was any error this will return {-1, -1} (Mostly errors can happen due to broken JMX connections.)
+    // The metrics will be in the following order
+    // {inter arrival rate (might be -1 for many cases, sice I do not calculate), total request count (upto now, not for the window!),
+    // mean latency (for the window), 99 percentile latency (for the window), std. deviation (for the window), errors (total, upto now)}
     @RequestMapping(value = "/performance", method=RequestMethod.GET)
     public Number[] performance(@RequestParam String server){
         System.out.println("Querying the current system performance");
@@ -75,6 +83,7 @@ public class MonitorController {
         return new Number[]{-1, -1};
     }
 
+    // This is similar to above case, but use to get the performance of the Netty server side
     @RequestMapping(value = "/performance-netty", method = RequestMethod.GET)
     public Number[] getPerformanceNetty(){
         Number iar = -1;
@@ -91,6 +100,8 @@ public class MonitorController {
         return new Number[]{-1, -1};
     }
 
+    // To set the thread pool size of the Netty third thread pool (one that we tune)
+    // e.g. /setThreadPoolNetty?size=150
     @RequestMapping(value = "setThreadPoolNetty", method = RequestMethod.PUT)
     public boolean setThreadPoolNetty(@RequestParam(value = "size") int size){
         try {
@@ -103,6 +114,7 @@ public class MonitorController {
         return false;
     }
 
+    // This will return the thread pool size of the third thread pool
     @RequestMapping(value = "getThreadPoolNetty", method = RequestMethod.GET)
     public Number getThreadPoolNetty(){
         try {
@@ -113,6 +125,8 @@ public class MonitorController {
         return -1;
     }
 
+    // Get the performance for the measurement interval (without ramp-up and ramp-down) of the test
+    // This is specificaly for TPC-W client side
     @RequestMapping(value = "/performance-mi", method = RequestMethod.GET)
     public Number[] getPerformanceMI(){
         // return the performance metrics collected only for the measurement interval
